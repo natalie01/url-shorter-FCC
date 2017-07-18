@@ -1,5 +1,5 @@
 {
-  "name": "express-app",
+  "name": "url-shortener",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -16,6 +16,7 @@
     "body-parser": "^1.17.2",
     "cors": "^2.8.4",
     "express": "^4.15.3",
+    "mongodb": "^2.2.30",
     "mongoose": "^4.11.3",
     "nodemon": "1.11.0"
   }

@@ -3,36 +3,31 @@ var express = require('express');
 var path = require('path');
 var bodyParser = require('body-parser');
 var mongodb = require('mongodb');
-
+var dotenv = require('dotenv');
+dotenv.config();
 var app = express();
 
 var port =  process.env.PORT || 3000;
 
-var MongoClient = mongodb.MongoClient;
-
-// Connection URL. This is where your mongodb server is running.
-
-//(Focus on This Variable)
-var url = process.env.MONGOLAB_URI;     
-//(Focus on This Variable)
-
-// Use connect method to connect to the Server
-  MongoClient.connect(url, function (err, db) {
-  if (err) {
-    console.log('Unable to connect to the mongoDB server. Error:', err);
-  } else {
-    console.log('Connection established to', url);
-
-    // do some work here with the database.
-
-    //Close connection
-    db.close();
-  }
-});
 app.use(bodyParser.json());
 
 app.use(cors());
 
+mongodb.MongoClient.connect(process.env.MONGODB_URI, function (err, database) {
+  if (err) {
+    console.log(err);
+    process.exit(1);
+  }
+
+  // Save database object from the callback for reuse.
+  db = database;
+  console.log("Database connection ready");
+
+  // Initialize the app.
+  app.listen(process.env.PORT || 8080, function () {
+    console.log("App now running on port", port);
+  });
+});
 
 app.get('/new/*',function(req,res,next){
 	var url = req.params[0];
@@ -44,17 +39,16 @@ app.get('/new/*',function(req,res,next){
 	if(regex.test(url)===true){
 		var short = Math.floor(Math.random()*1000).toString();
 	
-		var data = new shortUrl(
-		{
+		var data = {
 		originalUrl : url,
 		shortUrl : short
 		}
-		);
-
-		data.save(function(err){
-		 if(err){
+		
+		db.collection.insertOne(data,function(err))
+		 	
+			 if(err){
 		 	return res.send('Error saving to database');
-		 }
+			 }
 
 	 	return res.json({originalUrl : data.originalUrl , shortUrl : data.shortUrl});
 		});
@@ -69,7 +63,7 @@ app.get('/:url',function(req,res,next){
     var shorterUrl = req.params.url;
 	console.log(shorterUrl);
 
-	shortUrl.findOne({'shortUrl':shorterUrl},function(err,data){
+	db.collection.findOne({'shortUrl':shorterUrl},function(err,data){
 		if(err) return res.send('Error reading database');
 
 		var re = new RegExp("^(http|https)://", "i");
@@ -83,7 +77,3 @@ app.get('/:url',function(req,res,next){
 	});
 
 })
-
-app.listen(port,function(){
-console.log('app is working on port '+port);
-});
