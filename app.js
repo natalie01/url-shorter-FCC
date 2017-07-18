@@ -2,17 +2,37 @@ var cors = require('cors');
 var express = require('express');
 var path = require('path');
 var bodyParser = require('body-parser');
-var mongoose = require('mongoose');
-var shortUrl = require('./models/shortUrl')
+var mongodb = require('mongodb');
+var shortUrl = "shorturl";
 var app = express();
 
 var port =  process.env.PORT || 3000;
 
+var MongoClient = mongodb.MongoClient;
+
+// Connection URL. This is where your mongodb server is running.
+
+//(Focus on This Variable)
+var url = process.env.MONGOLAB_URI;     
+//(Focus on This Variable)
+
+// Use connect method to connect to the Server
+  MongoClient.connect(url, function (err, db) {
+  if (err) {
+    console.log('Unable to connect to the mongoDB server. Error:', err);
+  } else {
+    console.log('Connection established to', url);
+
+    // do some work here with the database.
+
+    //Close connection
+    db.close();
+  }
+});
 app.use(bodyParser.json());
 
 app.use(cors());
 
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/shortUrls');
 
 app.get('/new/*',function(req,res,next){
 	var url = req.params[0];
