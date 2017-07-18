@@ -3,7 +3,7 @@ var express = require('express');
 var path = require('path');
 var bodyParser = require('body-parser');
 var mongodb = require('mongodb');
-var shortUrl = "shorturl";
+
 var app = express();
 
 var port =  process.env.PORT || 3000;
